@@ -10,7 +10,24 @@ cat ./scripts.sh >> ~/.zshrc
 
 ## Useful Functions
 
-### `get_all_secrets`
+### `compare_secret`
+This function compares the values of two secrets and prints whether they are identical or different. You can specify the secret names and output format using flags.
+
+```sh
+compare_secret [-f format=json|text] <SECRET1> <SECRET2>
+```
+
+#### Flags:
+* `-f <format>`: The format of the secret values. Options are json or text. Default is json.
+
+Example:
+```sh
+compare_secret -f "json" "my-secret-1" "my-secret-2"
+```
+
+By following these steps and using the updated documentation, you should be able to retrieve, save, and compare secret values from AWS Secrets Manager using flag-based parameter specification. If you have any further questions or need additional assistance, feel free to ask!
+
+### `get_all_secret`
 This function retrieves all secrets and saves each value to a local file. You can specify the output format and root directory using flags.
 
 ```sh

@@ -121,3 +121,33 @@ get_all_secret() {
         get_secret -s "$SECRET" -f "$format" -d "$root_dir"
     done
 }
+
+compare_secret() {
+    local SECRET1=$1
+    local SECRET2=$2
+    local format="json"
+
+    while getopts "s:f:d:" opt; do
+        case $opt in
+            f) format=$OPTARG ;;
+            *) echo "Invalid option: -$OPTARG" >&2; return 1 ;;
+        esac
+    done
+
+    echo "Comparing $SECRET1 with $SECRET2."
+    secret_1_str=$(get_secret -s "$SECRET1")
+    secret_2_str=$(get_secret -s "$SECRET2")
+
+    if [ -n "$SECRET1" ] && [ -n "$SECRET2" ]; then
+        secret_1_str=$(get_secret -s "$SECRET1" -f "$format")
+        secret_2_str=$(get_secret -s "$SECRET2" -f "$format")
+
+        if [ "$secret_1_str" = "$secret_2_str" ]; then
+            echo "The secrets are identical."
+        else
+            echo "The secrets are different."
+        fi
+    else
+        echo "Both secret names must be provided."
+    fi
+}
