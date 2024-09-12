@@ -10,6 +10,39 @@ cat ./scripts >> ~/.zshrc
 
 ## Useful Functions
 
+### `get_all_secrets`
+This function retrieves all secrets and saves each value to a local file. You can specify the output format and root directory using flags.
+
+```sh
+get_all_secret [-f format=json|text] [-d root_dir=tmp]
+```
+
+#### Flags:
+* `-f <format>`: The format of the secret values. Options are json or text. Default is json.
+* `-d <root_dir>`: The root directory where the secret values will be saved. Default is tmp.
+
+Example:
+```sh
+get_all_secret -f "json" -d "/Users/liul31/secrets"
+```
+
+### `get_secret`
+This function retrieves the value of a given secret using either JSON or text format and saves it to a local file. You can specify the secret name, output format, and root directory using flags.
+
+```sh
+get_secret -s <SECRET> [-f format=json|text] [-d root_dir=tmp]
+```
+
+Flags:
+* `-s <SECRET>`: The name of the secret to retrieve. This flag is required.
+* `-f <format>`: The format of the secret value. Options are json or text. Default is json.
+* `-d <root_dir>`: The root directory where the secret value will be saved. Default is tmp.
+
+Example:
+```sh
+get_secret -s "my-secret" -f "json" -d "/Users/liul31/secrets"
+```
+
 ### `create_secret`
 
 This function creates or updates a secret using either text or binary data from a file. You can specify the secret name, file path, and type (text or binary).
@@ -31,20 +64,5 @@ This function switches to an assumed AWS role using the provided IAM role ID, na
 ```sh
 aws_switch <role_id> [<role_name>] [<session_name>]
 ```
-
-### `get_secret`
-This function retrieves the value of a given secret using either JSON or text format and saves it to a local file. You can specify the secret name and output format.
-
-```sh
-get_secret <SECRET> [format=json]
-```
-
-### `get_all_secrets`
-This function retrieves all secrets in JSON format and saves each value to a local file.
-
-```sh
-get_all_secrets [format=json|text]
-```
-
 
 Install AWS CLI if not already installed (https://aws.amazon.com/cli/) and configure it with your credentials.

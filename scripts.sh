@@ -13,16 +13,6 @@ create_secret() {
     local file_path=$2
     local type=$3
 
-    json_object=$(cat "$file_path")
-    aws secretsmanager create-secret --name "$secret_name" --secret-string "$json_object"
-    echo "Created or updated secret $secret_name with value from $file_path"
-}
-
-create_secret() {
-    local secret_name=$1
-    local file_path=$2
-    local type=$3
-
     if [[ $type == "binary" ]]; then
         binary_content=$(base64 -i "$file_path")
         aws secretsmanager create-secret --name "$secret_name" --secret-binary "$binary_content" ||
@@ -68,25 +58,40 @@ aws_switch() {
 }
 
 get_secret() {
-    local SECRET=$1
-    local format=$2
-
+    local SECRET=""
+    local format="json"
+    local root_dir="tmp"
+    while getopts "s:f:d:" opt; do
+        case $opt in
+            s) SECRET=$OPTARG ;;
+            f) format=$OPTARG ;;
+            d) root_dir=$OPTARG ;;
+            *) echo "Invalid option: -$OPTARG" >&2; return 1 ;;
+        esac
+    done
     if [ -n "$SECRET" ]; then
         SECRET_VALUE=$(aws secretsmanager get-secret-value --secret-id "$SECRET" --query 'SecretString' --output "$format")
-
         if [ "$SECRET_VALUE" = "null" ]; then
-            # If SecretString is null, retrieve SecretBinary and decode it
             SECRET_BINARY=$(aws secretsmanager get-secret-value --secret-id "$SECRET" --query 'SecretBinary' --output "$format")
             SECRET_VALUE=$(echo "$SECRET_BINARY")
         fi
 
         DIR="~/tmp/$(dirname "$SECRET")"
+
+        if [ -n "$root_dir" ]; then
+            DIR="$root_dir/$(dirname "$SECRET")"
+        fi
+
         echo "Creating directory: $DIR"
         mkdir -p "$DIR"
 
         FILE_PATH="~/tmp/$SECRET.txt"
-        echo "$SECRET_VALUE" > "$FILE_PATH"
 
+        if [ -n "$root_dir" ]; then
+            FILE_PATH="$root_dir/$SECRET.txt"
+        fi
+
+        echo "$SECRET_VALUE" > "$FILE_PATH"
         echo "Saved secret value for $SECRET to $FILE_PATH"
     else
         echo "Skipping empty secret name"
@@ -94,13 +99,18 @@ get_secret() {
 }
 
 get_all_secret() {
-    format=${1:"json"}
+    local format="json"
+    local root_dir="tmp"
+    while getopts "f:d:" opt; do
+        case $opt in
+            f) format=$OPTARG ;;
+            d) root_dir=$OPTARG ;;
+            *) echo "Invalid option: -$OPTARG" >&2; return 1 ;;
+        esac
+    done
     secrets=$(aws secretsmanager list-secrets --query 'SecretList[*].Name' --output text | xargs echo)
-
-    # IFS=' ' read -r -a secrets_array <<< "$secrets"
     secrets_array=("${(@s: :)secrets}")
-
     for SECRET in "${secrets_array[@]}"; do
-        get_secret "$SECRET" json
+        get_secret -s "$SECRET" -f "$format" -d "$root_dir"
     done
 }
