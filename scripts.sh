@@ -12,10 +12,12 @@ create_secret() {
     local secret_name=$1
     local file_path=$2
     local type=$3
+    kms_key_id="5c2cb521_a172_4ce5_ac52_d7f8b95fb9e9"
+    kms_key_id=$4
 
     if [[ $type == "binary" ]]; then
         binary_content=$(base64 -i "$file_path")
-        aws secretsmanager create-secret --name "$secret_name" --secret-binary "$binary_content" ||
+        aws secretsmanager create-secret --kms-key-id $kms_key_id --name "$secret_name" --secret-binary "$binary_content" ||
             aws secretsmanager update-secret --secret-id "$secret_name" --secret-binary "$binary_content"
         echo "Created or updated binary secret $secret_name with value from $file_path"
     else
@@ -31,12 +33,14 @@ update_secret() {
     local secret_name=$1
     local file_path=$2
     local type=$3
+    kms_key_id="5c2cb521_a172_4ce5_ac52_d7f8b95fb9e9"
+    kms_key_id=$4
 
     if [[ $type == "binary" ]]; then
         # binary_content=$(base64 -i "$file_path")
         # Assume file already in binary!
         binary_content=$(cat "$file_path")
-        aws secretsmanager update-secret --secret-id "$secret_name" --secret-binary "$binary_content"
+        aws secretsmanager update-secret --kms-key-id $kms_key_id --secret-id "$secret_name" --secret-binary "$binary_content"
         echo "Created or updated binary secret $secret_name with value from $file_path"
     else
         json_object=$(cat "$file_path")
