@@ -61,6 +61,7 @@ get_secret() {
     local SECRET=""
     local format="json"
     local root_dir="tmp"
+
     while getopts "s:f:d:" opt; do
         case $opt in
             s) SECRET=$OPTARG ;;
@@ -69,30 +70,36 @@ get_secret() {
             *) echo "Invalid option: -$OPTARG" >&2; return 1 ;;
         esac
     done
+
     if [ -n "$SECRET" ]; then
         SECRET_VALUE=$(aws secretsmanager get-secret-value --secret-id "$SECRET" --query 'SecretString' --output "$format")
+
         if [ "$SECRET_VALUE" = "null" ]; then
             SECRET_BINARY=$(aws secretsmanager get-secret-value --secret-id "$SECRET" --query 'SecretBinary' --output "$format")
             SECRET_VALUE=$(echo "$SECRET_BINARY")
         fi
 
-        DIR="~/tmp/$(dirname "$SECRET")"
+        if [ "$root_dir" = "tmp" ]; then
+            echo $SECRET_VALUE
+        else 
+            DIR="~/tmp/$(dirname "$SECRET")"
 
-        if [ -n "$root_dir" ]; then
-            DIR="$root_dir/$(dirname "$SECRET")"
+            if [ -n "$root_dir" ]; then
+                DIR="$root_dir/$(dirname "$SECRET")"
+            fi
+
+            echo "Creating directory: $DIR"
+            mkdir -p "$DIR"
+
+            FILE_PATH="~/tmp/$SECRET.txt"
+
+            if [ -n "$root_dir" ]; then
+                FILE_PATH="$root_dir/$SECRET.txt"
+            fi
+
+            echo "$SECRET_VALUE" > "$FILE_PATH"
+            echo "Saved secret value for $SECRET to $FILE_PATH"
         fi
-
-        echo "Creating directory: $DIR"
-        mkdir -p "$DIR"
-
-        FILE_PATH="~/tmp/$SECRET.txt"
-
-        if [ -n "$root_dir" ]; then
-            FILE_PATH="$root_dir/$SECRET.txt"
-        fi
-
-        echo "$SECRET_VALUE" > "$FILE_PATH"
-        echo "Saved secret value for $SECRET to $FILE_PATH"
     else
         echo "Skipping empty secret name"
     fi

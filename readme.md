@@ -29,6 +29,8 @@ get_all_secret -f "json" -d "/Users/liul31/secrets"
 ### `get_secret`
 This function retrieves the value of a given secret using either JSON or text format and saves it to a local file. You can specify the secret name, output format, and root directory using flags.
 
+If no `-d` specified it will simply output to stdout. Otherwise save to a file in root_dir.
+
 ```sh
 get_secret -s <SECRET> [-f format=json|text] [-d root_dir=tmp]
 ```
