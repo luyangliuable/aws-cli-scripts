@@ -5,7 +5,7 @@ This repository contains scripts for managing secrets using Amazon Web Services 
 ## Setup
 
 ```sh
-cat ./scripts >> ~/.zshrc
+cat ./scripts.sh >> ~/.zshrc
 ```
 
 ## Useful Functions
