@@ -127,13 +127,6 @@ compare_secret() {
     local SECRET2=$2
     local format="json"
 
-    while getopts "s:f:d:" opt; do
-        case $opt in
-            f) format=$OPTARG ;;
-            *) echo "Invalid option: -$OPTARG" >&2; return 1 ;;
-        esac
-    done
-
     echo "Comparing $SECRET1 with $SECRET2."
     secret_1_str=$(get_secret -s "$SECRET1")
     secret_2_str=$(get_secret -s "$SECRET2")
