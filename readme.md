@@ -10,7 +10,7 @@ cat ./scripts >> ~/.zshrc
 
 ## Useful Functions
 
-###`create_secret`
+### `create_secret`
 
 This function creates or updates a secret using either text or binary data from a file. You can specify the secret name, file path, and type (text or binary).
 
